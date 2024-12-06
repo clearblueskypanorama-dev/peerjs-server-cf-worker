@@ -19,7 +19,7 @@ export class PeerServerDO implements DurableObject {
 	}
 
 	get users() {
-		return this.state.getWebSockets().map(ws => ws.deserializeAttachment()) as RoomUser[]
+		return this.state.getWebSockets("user").map(ws => ws.deserializeAttachment()) as RoomUser[]
 	}
 
 	get names() {
@@ -28,7 +28,7 @@ export class PeerServerDO implements DurableObject {
 
 	// room users broadcasting
 	update(without?: string) {
-		const webSockets = this.state.getWebSockets()
+		const webSockets = this.state.getWebSockets("user")
 		let users = webSockets.map(webSocket => webSocket.deserializeAttachment()) as RoomUser[]
 		if (without) users = users.filter(({ id }) => id !== without);
 		const data = JSON.stringify(users)
@@ -68,7 +68,7 @@ export class PeerServerDO implements DurableObject {
 		const user: RoomUser = { id, name, user: true }
 		const [client, server] = Object.values(new WebSocketPair());
 
-		this.state.acceptWebSocket(server, [name])
+		this.state.acceptWebSocket(server, [name, "user"])
 		server.serializeAttachment(user)
 		server.send(this.state.id.toString()) // send room id
 
@@ -94,7 +94,7 @@ export class PeerServerDO implements DurableObject {
 			existingWss.forEach((ws) => ws.close(1000));
 		}
 
-		this.state.acceptWebSocket(server, [id]);
+		this.state.acceptWebSocket(server, [id, "peerjs"]);
 		server.serializeAttachment({ id, token });
 		server.send(OPEN);
 
