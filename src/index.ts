@@ -159,5 +159,7 @@ export default {
 			const roomId = env.PEER_SERVER.idFromString(a);
 			return env.PEER_SERVER.get(roomId).fetch(request);
 		}
+
+		return new Response(null, { status: 404 })
 	},
 };
